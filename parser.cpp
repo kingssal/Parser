@@ -17,3 +17,19 @@ enum TokenType {
     END_OF_FILE, //파일의 끝, 입력 스트림이 끝났음을 나타냄
     ERROR // 오류 표시
 };
+
+//global variables
+TokenType next_token;
+std::string token_string;
+
+//스트링이 숫자인지 확인하기 위한 함수
+bool isNumber(const std::string& str){
+    for(char const &c : str) {
+        if(std::isdigit(c)==0){
+            return false;
+        }
+    }
+    return true;
+}
+
+//leximal analyzer function
