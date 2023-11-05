@@ -1,6 +1,17 @@
 //파싱함수 관련 코드
 #include "lexer.h"
 
+// 함수 프로토타입 선언
+void program();
+void statements();
+void statement();
+void expression();
+void term();
+void term_tail();
+void factor();
+void factor_tail();
+void match(TokenType expected);
+
 
 void program(){
     statements();
