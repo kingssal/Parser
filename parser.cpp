@@ -84,17 +84,17 @@ void match(TokenType expected) {
 }
 
 int main() {
-    // 파일을 열고, 입력 스트림을 초기화합니다.
+    // 파일을 열고, 입력 스트림을 초기화
     in.open("input.txt");
     if (!in) {
         std::cerr << "File could not be opened." << std::endl;
         return 1;
     }
 
-    // 어휘 분석기와 파서를 초기화하고 시작합니다.
-    lexical(in); // 첫 번째 토큰을 가져옵니다.
-    program();   // 파싱을 시작합니다.
+    // 어휘 분석기와 파서를 초기화하고 시작
+    lexical(in); // 첫 번째 토큰을 가져옴
+    program();   // 파싱을 시작
 
-    in.close();  // 파일 스트림을 닫습니다.
+    in.close();  // 파일 스트림을 닫음
     return 0;
 }
