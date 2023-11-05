@@ -1,35 +1,89 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <cctype>
-#include <map>
+//파싱함수 관련 코드
+#include "lexer.h"
 
-//토큰 타입
-enum TokenType {
-    IDENTIFIER, //변수명, 함수명과 같은 식별자.
-    CONSTANT, //상수 10진수
-    ASSIGN_OP, //할당 연산자 :=로 한정
-    ADD_OP, //덧셈,뺄셈 연산자
-    MULT_OP, //곱셈,나눗셈 연산자
-    SEMI_COLON, //세미콜론
-    LEFT_PAREN, //왼쪽 괄호
-    RIGHT_PAREN, //오른쪽 괄호
-    END_OF_FILE, //파일의 끝, 입력 스트림이 끝났음을 나타냄
-    ERROR // 오류 표시
-};
 
-//global variables
-TokenType next_token;
-std::string token_string;
-
-//스트링이 숫자인지 확인하기 위한 함수
-bool isNumber(const std::string& str){
-    for(char const &c : str) {
-        if(std::isdigit(c)==0){
-            return false;
-        }
-    }
-    return true;
+void program(){
+    statements();
 }
 
-//leximal analyzer function
+void statements() {
+    statement();
+    if(next_token == SEMI_COLON){
+        match(SEMI_COLON);
+        statements();
+    }
+}
+void statement() {
+    match(IDENTIFIER);
+    match(ASSIGN_OP);
+    expression();
+}
+
+void expression() {
+    term();
+    term_tail();
+}
+
+void term_tail() {
+    if (next_token == ADD_OP) {
+        match(ADD_OP);
+        term();
+        term_tail();
+    }
+    // ε 경우는 아무것도 하지 않고 반환
+}
+
+void term() {
+    factor();
+    factor_tail();
+}
+
+void factor_tail() {
+    if (next_token == MULT_OP) {
+        match(MULT_OP);
+        factor();
+        factor_tail();
+    }
+    // ε 경우는 아무것도 하지 않고 반환
+}
+
+void factor() {
+    if (next_token == LEFT_PAREN) {
+        match(LEFT_PAREN);
+        expression();
+        match(RIGHT_PAREN);
+    } else if (next_token == IDENTIFIER) {
+        match(IDENTIFIER);
+    } else if (next_token == CONSTANT) {
+        match(CONSTANT);
+    } else {
+        // 오류 처리
+    }
+}
+
+std::ifstream in;
+
+void match(TokenType expected) {
+    if (next_token == expected) {
+        // 다음 토큰으로 이동
+        lexical(in);
+    } else {
+        // 오류 처리
+    }
+}
+
+int main() {
+    // 파일을 열고, 입력 스트림을 초기화합니다.
+    in.open("input.txt");
+    if (!in) {
+        std::cerr << "File could not be opened." << std::endl;
+        return 1;
+    }
+
+    // 어휘 분석기와 파서를 초기화하고 시작합니다.
+    lexical(in); // 첫 번째 토큰을 가져옵니다.
+    program();   // 파싱을 시작합니다.
+
+    in.close();  // 파일 스트림을 닫습니다.
+    return 0;
+}
