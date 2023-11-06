@@ -15,6 +15,15 @@ void factor();
 void factor_tail();
 void match(TokenType expected);
 
+// 전역 변수로 심볼 테이블과 오류 카운트를 추가합니다.
+std::map<std::string, int> symbolTable;
+int identifierCount = 0;
+int constantCount = 0;
+int operatorCount = 0;
+bool hasError = false;
+
+int errorCount = 0;
+
 
 void program(){
     statements();
@@ -80,16 +89,27 @@ std::ifstream in;
 
 void match(TokenType expected) {
     if (next_token == expected) {
+        if (expected == IDENTIFIER) {
+            identifierCount++;
+            // 변수 이름을 심볼 테이블에 추가하거나 업데이트
+            // 현재는 0으로 초기화하지만, 실제 값으로 업데이트해야 할 수 있습니다.
+            symbolTable[token_string] = 0;
+        } else if (expected == CONSTANT) {
+            constantCount++;
+        } else if (expected == ADD_OP || expected == MULT_OP || expected == ASSIGN_OP) {
+            operatorCount++;
+        }
         // 다음 토큰으로 이동
         lexical(in);
     } else {
         // 오류 처리
+        std::cout << "Error: expected token " << expected << " but found " << next_token << std::endl;
+        hasError = true;
     }
 }
 
-// 전역 변수로 심볼 테이블과 오류 카운트를 추가합니다.
-std::map<std::string, int> symbolTable;
-int errorCount = 0;
+
+
 
 // 오류 메시지를 출력하고 오류 카운트를 증가시키는 함수
 void error(const std::string& message) {
@@ -146,14 +166,22 @@ int main() {
     // 어휘 분석기와 파서를 초기화하고 시작
     lexical(in); // 첫 번째 토큰을 가져옴
     program();   // 파싱을 시작
+    // 토큰 개수 출력
+    std::cout << "ID:" << identifierCount << "; CONST:" << constantCount << "; OP:" << operatorCount << ";" << std::endl;
 
-    printSymbolTable();
-
-    in.close();  // 파일 스트림을 닫음
-    if (errorCount == 0) {
-        for (const auto& entry : symbolTable) {
-            std::cout << entry.first << ": " << entry.second << std::endl;
-        }
+    // 파싱 결과 출력
+    if (hasError) {
+        std::cout << "Parsing Result: (ERROR)" << std::endl;
+    } else {
+        // 경고가 있는 경우 (WARNING)을 출력할 수 있습니다.
+        std::cout << "Parsing Result: (OK)" << std::endl;
     }
+
+    // 심볼 테이블 결과 출력
+    std::cout << "Result ==> ";
+    for (const auto& entry : symbolTable) {
+        std::cout << entry.first << ":" << entry.second << ";";
+    }
+    std::cout << std::endl;
     return 0;
 }

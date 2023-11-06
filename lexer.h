@@ -4,6 +4,8 @@
 #include <cctype>
 #include <map>
 
+
+
 //토큰 타입
 enum TokenType {
     IDENTIFIER, //변수명, 함수명과 같은 식별자. 0
