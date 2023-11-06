@@ -1,5 +1,8 @@
 //파싱함수 관련 코드
 #include "lexer.h"
+#include <map>
+#include <string>
+#include <iostream>
 
 // 함수 프로토타입 선언
 void program();
@@ -69,6 +72,7 @@ void factor() {
         match(CONSTANT);
     } else {
         // 오류 처리
+    
     }
 }
 
@@ -83,6 +87,54 @@ void match(TokenType expected) {
     }
 }
 
+// 전역 변수로 심볼 테이블과 오류 카운트를 추가합니다.
+std::map<std::string, int> symbolTable;
+int errorCount = 0;
+
+// 오류 메시지를 출력하고 오류 카운트를 증가시키는 함수
+void error(const std::string& message) {
+    std::cerr << "Error: " << message << std::endl;
+    ++errorCount;
+}
+
+// 오류가 발생했을 때 복구를 시도하는 함수
+void recover() {
+    // 복구 로직을 구현합니다. 예를 들어, 세미콜론을 찾을 때까지 토큰을 건너뛰는 등의 방법이 있습니다.
+    while (next_token != SEMI_COLON && next_token != END_OF_FILE) {
+        lexical(in); // 다음 토큰으로 이동
+    }
+    // 세미콜론을 찾았다면, 파싱을 계속하기 위해 건너뛰고 다음 토큰으로 이동합니다.
+    if (next_token == SEMI_COLON) {
+        lexical(in); // 다음 토큰으로 이동
+    }
+}
+
+
+// 변수를 심볼 테이블에 추가하거나 업데이트하는 함수입니다.
+void updateSymbolTable(const std::string& identifier, int value) {
+    symbolTable[identifier] = value;
+}
+
+// 심볼 테이블에서 변수의 값을 조회하는 함수입니다.
+int getValueFromSymbolTable(const std::string& identifier) {
+    if (symbolTable.find(identifier) != symbolTable.end()) {
+        return symbolTable[identifier];
+    } else {
+        std::cerr << "Error: Variable " << identifier << " not defined." << std::endl;
+        return 0; // 오류가 발생한 경우 기본값으로 0을 반환합니다.
+    }
+}
+
+// 심볼 테이블의 내용을 출력하는 함수입니다.
+void printSymbolTable() {
+    std::cout << "Symbol Table:" << std::endl;
+    for (const auto& entry : symbolTable) {
+        std::cout << entry.first << " = " << entry.second << std::endl;
+    }
+}
+
+
+
 int main() {
     // 파일을 열고, 입력 스트림을 초기화
     in.open("input.txt");
@@ -95,6 +147,13 @@ int main() {
     lexical(in); // 첫 번째 토큰을 가져옴
     program();   // 파싱을 시작
 
+    printSymbolTable();
+
     in.close();  // 파일 스트림을 닫음
+    if (errorCount == 0) {
+        for (const auto& entry : symbolTable) {
+            std::cout << entry.first << ": " << entry.second << std::endl;
+        }
+    }
     return 0;
 }
